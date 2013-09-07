@@ -4,7 +4,9 @@ require.config({
         jqueryUI: '../bower_components/jquery-ui/ui/jquery-ui',
         bootstrap: 'vendor/bootstrap',
         underscore: '../bower_components/underscore/underscore',
-        "mediator-js": '../bower_components/mediator-js/lib/mediator'
+        "mediator-js": '../bower_components/mediator-js/lib/mediator',
+        vq : '../bower_components/visquick/vq',
+        circvis : '../bower_components/visquick/vq.circvis'
     },
     shim : {
     	"bootstrap" : {
@@ -17,6 +19,10 @@ require.config({
         },
     	"underscore" : {
     		"exports": '_'
+    	},
+    	circvis : {
+    			"deps" : ['vq'],
+    			exports: 'vq'
     	}
     }
 });
