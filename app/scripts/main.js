@@ -20,6 +20,10 @@ require.config({
     	"underscore" : {
     		"exports": '_'
     	},
+        vq : {
+                "deps" : ['underscore'],
+                exports: 'vq'
+        },
     	circvis : {
     			"deps" : ['vq'],
     			exports: 'vq'
@@ -27,7 +31,7 @@ require.config({
     }
 });
 
-require(['app', 'underscore', 'jquery', 'jqueryUI','bootstrap' ], function (app, _, $) {
+require(['app', 'underscore', 'jquery', 'jqueryUI', 'vq', 'circvis', 'bootstrap' ], function (app, _, $) {
     'use strict';
     // use app here
     $.when( app.initialize() ).done(app.start);
