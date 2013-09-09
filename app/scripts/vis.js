@@ -14,7 +14,7 @@ function initializeVis(deferred) {
 			return deferred.promise();
 		},
 		plot : function(div) {
-			var config = circ_config.container(div).config();
+			var config = circ_config.container(div).rings([{key:"FBAT:M",label:"FBAT"}]).config();
 			var dataObject = {
 				DATATYPE: "vq.models.CircVisData",
 				CONTENTS: config

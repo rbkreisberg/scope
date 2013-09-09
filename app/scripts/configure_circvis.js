@@ -227,50 +227,110 @@ define(['vq'], function(vq) {
 
 	var div = document.body;
 
-	var config = {
-		DATA: {
-			features: [],
-			edges: [],
-			hash: function(feature) {
-				return feature.label
-			}
-		},
-		PLOT: {
-			container: div,
-			width: width,
-			height: height,
-			vertical_padding: 10,
-			horizontal_padding: 10,
-			enable_pan: false,
-			enable_zoom: false,
-			show_legend: false
-		},
-
-		GENOME: {
+	var config = function() {
+		return {
 			DATA: {
-				key_order: chrom_keys,
-				key_length: _.map(chrom_keys, function(key) {
-					return {
-						chr_name: key,
-						chr_length: chrom_attr[key].length
-					};
-				})
+				features: [],
+				edges: [],
+				hash: function(feature) {
+					return feature.label
+				}
 			},
-			OPTIONS: {
-				radial_grid_line_width: 2,
-				label_layout_style: 'clock',
-				label_font_style: '16px helvetica',
-				gap_degrees: 2
-			}
-		},
+			PLOT: {
+				container: div,
+				width: width,
+				height: height,
+				vertical_padding: 10,
+				horizontal_padding: 10,
+				enable_pan: false,
+				enable_zoom: false,
+				show_legend: false
+			},
 
-		WEDGE: [{
+			GENOME: {
+				DATA: {
+					key_order: chrom_keys,
+					key_length: _.map(chrom_keys, function(key) {
+						return {
+							chr_name: key,
+							chr_length: chrom_attr[key].length
+						};
+					})
+				},
+				OPTIONS: {
+					radial_grid_line_width: 2,
+					label_layout_style: 'clock',
+					label_font_style: '16px helvetica',
+					gap_degrees: 2
+				}
+			},
+
+			WEDGE: [],
+			TICKS: {
+				OPTIONS: {
+					wedge_height: 15,
+					wedge_width: 0.7,
+					overlap_distance: 10000000, //tile ticks at specified base pair distance
+					height: 40,
+					fill_style: tick_colors,
+					tooltip_items: hovercard_items_config,
+					tooltip_links: hovercard_links_config
+				}
+			},
+			NETWORK: {
+				DATA: {
+					data_array: [] //
+				},
+				OPTIONS: {
+					render: true,
+					outer_padding: 10,
+					tile_nodes: Boolean(true),
+					node_overlap_distance: 3e7,
+					node_radius: 6,
+					node_fill_style: tick_colors,
+					link_stroke_style: "#CA949F",
+					link_line_width: 8,
+					link_alpha: 0.6,
+					node_highlight_mode: 'isolate',
+					node_key: function(node) {
+						return node.label;
+					},
+					node_tooltip_items: hovercard_items_config,
+					node_tooltip_links: hovercard_links_config,
+					link_tooltip_items: {
+						'Target': function(link) {
+							var label = link.source.label.split(':');
+							return '<span style="color:' + tick_colors(link.source) + '">' +
+								label_map[label[1]] + '</span> ' + label[2];
+						},
+						'Target Location': function(link) {
+							return 'Chr ' + link.source.chr + ' ' + link.source.start +
+								(link.source.end ? '-' + link.source.end : '');
+						},
+						'Predictor': function(link) {
+							var label = link.target.label.split(':');
+							return '<span style="color:' + tick_colors(link.target) + '">' +
+								label_map[label[1]] + '</span> ' + label[2];
+						},
+						'Predictor Location': function(link) {
+							return 'Chr ' + link.target.chr + ' ' + link.target.start +
+								(link.target.end ? '-' + link.target.end : '');
+						},
+						Importance: 'assoc_value1'
+					}
+				}
+			}
+		};
+	}
+
+	var ring = function(pair) {
+		return {
 			PLOT: {
 				height: 10,
 				type: 'glyph'
 			},
 			DATA: {
-				value_key: 'annotated_type',
+				value_key: pair.key,
 			},
 			OPTIONS: {
 				tile_height: 10,
@@ -278,136 +338,43 @@ define(['vq'], function(vq) {
 				tile_overlap_distance: 100000000,
 				tile_show_all_tiles: true,
 				fill_style: function(feature) {
-					return type_color(types[feature.annotated_type]);
+					return 'red';
 				},
 				stroke_style: null,
 				line_width: 3,
-				legend_label: 'Clinical Associations',
-				shape: clinical_shape,
+				legend_label: pair.label,
+				shape: 'circle',
 				radius: 9,
-				legend_description: 'Clinical Associations',
+				legend_description: pair.label,
 				listener: function() {
 					return null;
 				},
 				outer_padding: 5,
-				tooltip_items: clinical_hovercard_items_config,
-				tooltip_links: hovercard_links_config
-			}
-		}, {
-			PLOT: {
-				height: 50,
-				type: 'barchart'
-			},
-			DATA: {
-				value_key: 'mutation_count'
-			},
-			OPTIONS: {
-				legend_label: 'Mutation Count',
-				legend_description: 'Mutation Count',
-				min_value: 0,
-				max_value: 300,
-				base_value: 0,
-				radius: 6,
-				outer_padding: 10,
-				stroke_style: heatmap_scale,
-				line_width: 6,
-				tooltip_items: hovercard_items_config,
-				tooltip_links: hovercard_links_config,
-				fill_style: "#C65568",
-				listener: function() {
-					return null;
-				}
-			}
-		}, {
-			PLOT: {
-				height: 20,
-				type: 'scatterplot'
-			},
-			DATA: {
-				value_key: 'mutation_count'
-			},
-			OPTIONS: {
-				legend_label: 'Mutation Count',
-				legend_description: 'Mutation Count',
-				min_value: 0,
-				max_value: 300,
-				base_value: 120,
-				radius: 6,
-				outer_padding: 10,
-				stroke_style: heatmap_scale,
-				line_width: 1,
-				shape: 'dot',
-				draw_axes: false,
-				tooltip_items: hovercard_items_config,
-				tooltip_links: hovercard_links_config,
-				fill_style: heatmap_scale,
-				listener: function() {
-					return null;
-				}
-			}
-		}],
-		TICKS: {
-			OPTIONS: {
-				wedge_height: 15,
-				wedge_width: 0.7,
-				overlap_distance: 10000000, //tile ticks at specified base pair distance
-				height: 40,
-				fill_style: tick_colors,
-				tooltip_items: hovercard_items_config,
-				tooltip_links: hovercard_links_config
-			}
-		},
-		NETWORK: {
-			DATA: {
-				data_array: [] //
-			},
-			OPTIONS: {
-				render: true,
-				outer_padding: 10,
-				tile_nodes: Boolean(true),
-				node_overlap_distance: 3e7,
-				node_radius: 6,
-				node_fill_style: tick_colors,
-				link_stroke_style: "#CA949F",
-				link_line_width: 8,
-				link_alpha: 0.6,
-				node_highlight_mode: 'isolate',
-				node_key: function(node) {
-					return node.label;
-				},
-				node_tooltip_items: hovercard_items_config,
-				node_tooltip_links: hovercard_links_config,
-				link_tooltip_items: {
-					'Target': function(link) {
-						var label = link.source.label.split(':');
-						return '<span style="color:' + tick_colors(link.source) + '">' +
-							label_map[label[1]] + '</span> ' + label[2];
-					},
-					'Target Location': function(link) {
-						return 'Chr ' + link.source.chr + ' ' + link.source.start +
-							(link.source.end ? '-' + link.source.end : '');
-					},
-					'Predictor': function(link) {
-						var label = link.target.label.split(':');
-						return '<span style="color:' + tick_colors(link.target) + '">' +
-							label_map[label[1]] + '</span> ' + label[2];
-					},
-					'Predictor Location': function(link) {
-						return 'Chr ' + link.target.chr + ' ' + link.target.start +
-							(link.target.end ? '-' + link.target.end : '');
-					},
-					Importance: 'assoc_value1'
-				}
+				tooltip_items: {},
+				tooltip_links: {}
 			}
 		}
 	};
 
+	var config_obj = config();
+
 	var CircvisObj = {
+		reset: function() {
+			config_obj = config();
+		},
 		config: function() {
-			return config;
+			return config_obj;
 		},
 		container: function(div) {
-			config.PLOT.container = div;
+			config_obj.PLOT.container = div;
+			return this;
+		},
+		rings: function(test_pairs) {
+			config_obj.WEDGE = test_pairs.map(ring);
+			return this;
+		},
+		size: function(diameter) {
+			config_obj.PLOT.width = config_obj.PLOT.height = diameter;
 			return this;
 		}
 	};
