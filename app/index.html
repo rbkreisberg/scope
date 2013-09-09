@@ -23,10 +23,78 @@
                 <link rel="stylesheet" href="styles/bootstrap.css">
                 <link rel="stylesheet" href="styles/bootstrap-theme.css">
                 <link rel="stylesheet" href="bower_components/jquery-ui/themes/ui-lightness/jquery-ui.css">
+                <link rel="stylesheet" href="bower_components/visquick/assets/css/vq.css">
                 <link rel="stylesheet" href="styles/scope.css">
                 <!-- endbuild -->
 </head>
 <body>
+                <div class="row">
+                    <div id="sideMenu" class="col-md-2 col-lg-2" data-offset-top="100">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <button id="sideMenuToggle" type="button" class="btn btn-primary btn-block btn-lg">
+                                    <span id="sideMenuButton" class="glyphicon glyphicon-chevron-right"></span>
+                                </button>
+                            </div>
+                            <div class="panel-body">
+                                <div class="container">
+                                    <div class="row">
+                                        <form class="form-horizontal" role="form">
+                                            <div class="form-group">
+                                                <label for="inputPhenotype" class="col-lg-2 control-label">Phenotype</label>
+                                                <div class="col-md-offset-1 col-lg-9">
+                                                    <select class="form-control" id="inputPhenotype">
+                                                        <option value="*">All</option>
+                                                        <option value="B:CLIN:Preterm">Preterm</option>
+                                                        <option value="B:CLIN:1n2v4">1n2v4</option>
+                                                        <option value="B:CLIN:1v4">1v4</option>
+                                                        <option value="B:CLIN:ETPL">ETPL</option>
+                                                        <option value="B:MRGE:History_of_Preterm_Birth">History of PTB</option>
+                                                        <option value="B:MRGE:Prom_Related">PROM</option>
+                                                        <option value="B:CLIN:Preeclampsia/Eclampsia">Preeclampsia</option>
+                                                        <option value="B:MRGE:Strict_Infection_Related">Infection</option>
+                                                        <option value="B:CLIN:Incompetent_Shortened_Cervix">Cervix</option>
+                                                        <option value="B:MRGE:Uterine_Related">Uterine</option>
+                                                        <option value="B:MRGE:Placenta_Related">Placenta</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="inputModel" class="col-lg-2 control-label">Model</label>
+                                                <div class="col-md-offset-1 col-lg-9">
+                                                    <select class="form-control" id="inputModel">
+                                                        <option value="*">All</option>
+                                                        <option value="a">Additive</option>
+                                                        <option value="d">Dominant</option>
+                                                        <option value="r">Recessive</option>
+                                                        <option value="m">Master</option>
+                                                        <option value="rank">Rank Agg</option>
+                                                        <option value="avg">Average</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="inputTest" class="col-lg-2 control-label">Test</label>
+                                                <div class="col-md-offset-1 col-lg-9">
+                                                    <select class="form-control" id="inputTest">
+                                                        <option value="*">All</option>
+                                                        <option value="tdt">TDT</option>
+                                                        <option value="fbat">FBAT</option>
+                                                        <option value="fam_agg">FAM_AGGR</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="mainPanel" class="col-md-10 col-lg-10">
+                        <div id="circvis"></div>
+                    </div>
+                </div>
+
                 <!--[if lt IE 10]>
                 <p class="browsehappy">
                     You are using an <strong>outdated</strong>
