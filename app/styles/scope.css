@@ -1,8 +1,38 @@
-body {
-    background: #777777;
+ html, body{
+        height:100%;
+        background:#ccc;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #333;
-    padding-top: 70px;
+    padding-top:20px;
+}
+
+/* menu transition */
+
+.row div {
+    -webkit-transition: width 0.3s ease, margin 0.3s ease;
+    -moz-transition: width 0.3s ease, margin 0.3s ease;
+    -o-transition: width 0.3s ease, margin 0.3s ease;
+    transition: width 0.3s ease, margin 0.3s ease;
+}
+
+#sideMenu {
+  height: 500px;
+  top: 20px;
+}
+
+#sideMenu .panel, #sideMenu .panel-body { 
+  height: 100%;
+}
+
+#sideMenu .panel-body {
+  overflow: auto;
+}
+
+#circvis svg {
+  background-color:#fff;
+      -webkit-border-radius: 999px;
+    -moz-border-radius: 999px;
+    border-radius: 999px;
 }
 
 #carve-container {
