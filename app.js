@@ -10,10 +10,11 @@ var app = express();
 // Configuration
 
 app.enable('trust proxy');
+app.set("view options", {layout: false});
+app.use(express.static(__dirname + '/dist'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(app.router);
-app.use(express.static(__dirname + '../source/dist/'));
 
 app.configure('development', function() {
   app.use(express.errorHandler({
@@ -28,43 +29,63 @@ app.configure('production', function() {
 
 // Routes
 app.get('/', function(req, res) {
-  res.render('index', {});
+  res.render('index.html');
 });
 
-app.get('/variants', function(req, res) {
-  RetrieveVariants(req.body, res);
+app.get('/variants/:table/:target/:test', function(req, res) {
+  RetrieveVariants(req.params, res);
+});
+
+app.get('/variants/:table/:target/:test/:model', function(req, res) {
+  RetrieveVariants(req.params, res);
 });
 
 var connString = require('./database.json').connectString;
 
 // RetrieveVariants
 
-function RetrieveVariants(bounds, res) {
+function RetrieveVariants(params, res) {
 
-  pg.connect(connString, function(err, client) {
+  var table = params.table;
+  var target = params.target || "*";
+  var test = params.test || "*";
+  var model = params.model || "*";
 
-    var sql = 'SELECT label, chr, start, stop, test, score, info from variant_tests_090913 order by score asc limit 300';
+  pg.connect(connString, function(err, client, done) {
+    var handleError = function(err) {
+      if(!err) return false;
+      console.error('Error querying postgres', err);
+      done(client);
+      res.send(ErrorResponse(err));
+      return true;
+    };
 
-    client.query(sql, function(err, result) {
+    var target_where = (target === "*" ? '' : '\' and target_label = \'' + target + '\'');
 
-      console.log('Rows: ' + result.rows.length);
-      var featureCollection = new FeatureCollection();
+    var model_where = (model === "*" ? '' : '\' and test_model = \'' + model + '\'');
+    var where = ' where test_type = \'' + test + target_where + model_where;
 
-      for (i = 0; i < result.rows.length; i++) {
-        console.log(result.rows[i]);
-        featureCollection.features[i] = result.rows[i];
-      }
+    var sql = 'SELECT chr, start, test_type, test_model, target_label, sample, score from ' + table + 
+          where +' order by score asc limit 300';
 
-      res.send(featureCollection);
+    console.log('querying: ' + sql);
+
+    var query =  client.query(sql,  function(error, result) {
+      if (handleError(error)) return;
+      done();
+      res.send(QueryResponse(result));
     });
   });
 }
 
-// GeoJSON Feature Collection
+// Response Objects
 
-function FeatureCollection() {
-  this.type = 'variants';
-  this.features = new Array();
+function ErrorResponse(err) {
+  return { status : 'error', message : err };
+}
+
+function QueryResponse(result) {
+  return { status : 'success', results : result.rows };
 }
 
 var server = app.listen(3000);
