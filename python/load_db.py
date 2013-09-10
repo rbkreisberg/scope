@@ -51,9 +51,9 @@ def loadDatabase(loadFile,tableName, conn):
 		' split_part(test, '|', 2), split_part(split_part(test,'|',2),':',3), split_part(test,'|',3),' +
 		' score from variant_tests_090913')
 	cur.execute('create index on variant_tests_summary_090913 (score asc)')
-	cur.execute('create index on variant_tests_summary_090913 (target_label)')
-	cur.execute('create index on variant_tests_summary_090913 (test_type)')
-	cur.execute('create index on variant_tests_summary_090913 (test_type, test_model)')
+	cur.execute('create index on variant_tests_summary_090913 (target_label, test_type, score asc)')
+	cur.execute('create index on variant_tests_summary_090913 (test_type, score asc)')
+	cur.execute('create index on variant_tests_summary_090913 (test_type, test_model, score asc)')
 	conn.commit()
 	cur.close()
 
