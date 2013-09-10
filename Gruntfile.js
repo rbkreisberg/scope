@@ -50,21 +50,28 @@ module.exports = function (grunt) {
                 // change this to '0.0.0.0' to access the server from outside
                 hostname: '0.0.0.0'
             },
+            proxies: [{
+                context: '/variants',
+                host: 'glados2', // you can use localhost...
+                port: 3000, // enter your port number here...
+                https: false,
+                changeOrigin: false
+            }],
             livereload: {
                 options: {
-                    middleware: function (connect) {
+                    middleware: function(connect) {
                         return [
                             lrSnippet,
                             mountFolder(connect, '.tmp'),
                             mountFolder(connect, yeomanConfig.app),
-			                proxySnippet
+                            proxySnippet
                         ];
                     }
                 }
             },
             test: {
                 options: {
-                    middleware: function (connect) {
+                    middleware: function(connect) {
                         return [
                             mountFolder(connect, '.tmp'),
                             mountFolder(connect, 'test'),
@@ -75,7 +82,7 @@ module.exports = function (grunt) {
             },
             dist: {
                 options: {
-                    middleware: function (connect) {
+                    middleware: function(connect) {
                         return [
                             mountFolder(connect, yeomanConfig.dist)
                         ];
