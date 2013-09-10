@@ -80,3 +80,22 @@
 #feature_list ul {
 	list-style: none;
 }
+
+/* circvis */
+.hovercard {
+    line-height:1.1em;
+}
+
+[class^="icon-"]:before {
+  font-family: 'Glyphicons Halflings';
+  -webkit-font-smoothing: antialiased;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+}
+.icon-move:before {
+  content: "\e068";
+}
+.icon-pushpin:before {
+  content: "\1f4cc";
+}
