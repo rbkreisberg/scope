@@ -60,11 +60,15 @@ function RetrieveVariants(params, res) {
       return true;
     };
 
-    var target_where = (target === "*" ? '' : '\' and target_label = \'' + target + '\'');
+    var target_where = (target === "*" ? '' : 'target_label = \'' + target + '\'');
+    var model_where = (model === "*" ? '' : 'test_model = \'' + model + '\'');
+    var test_where = (test === "*" ? '' : 'test_type = \'' + test + '\'');
 
-    var model_where = (model === "*" ? '' : '\' and test_model = \'' + model + '\'');
-    var where = ' where test_type = \'' + test + target_where + model_where;
+    var clauses = [target_where, model_where, test_where].filter(function(w) { return w != '';});
 
+    var where = '';
+    if ( clauses.length > 0 ) { where = ' where ' + clauses.join(' and '); }
+    
     var sql = 'SELECT chr, start, test_type, test_model, target_label, sample, score from ' + table + 
           where +' order by score asc limit 300';
 
