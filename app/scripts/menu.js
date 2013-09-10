@@ -15,11 +15,24 @@ function setupSideMenu() {
 	});
 }
 
+function getSelectedValue(elementId) {
+			var value = $('#' + elementId + ' :selected').val();
+			if (value === "All") {value = "*";}
+			return value
+}
+
 	var Menu = {
 		initialize : function(  ) {
 			var deferred = $.Deferred();
 			initializeMenu( deferred );
 			return deferred.promise();
+		},
+		state: function ( ) {
+			return { 
+				target : getSelectedValue('inputTarget'),
+			 	model : getSelectedValue('inputModel'),
+			 	test : getSelectedValue('inputTest')
+			};
 		}
 
 	};

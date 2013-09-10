@@ -157,27 +157,15 @@ define(['vq'], function(vq) {
 
 	var types = Object.keys(label_map);
 
-	var hovercard_items_config = {
-		Feature: function(feature) {
-			var label = feature.label.split(':');
-			return label[2] +
-				' (<span style="color:' + type_color(feature_type(feature)) + '">' +
-				label_map[feature_type(feature)] + '</span>)';
-		},
+	var hovercard_items_config = {	
 		Location: function(feature) {
-			return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');
+			return 'Chr ' + feature.chr + ' ' + feature.start;
 		},
-		'Somatic Mutations': 'mutation_count'
+		Target: 'target_label',
+		Test: 'test_type',
+		Model : 'test_model',
+		'Score': 'score'
 	};
-
-	var clinical_hovercard_items_config = _.extend({}, hovercard_items_config);
-
-	_.extend(clinical_hovercard_items_config, {
-		'Clinical Coorelate': function(feature) {
-			var label = feature.clin_alias.split(':');
-			return label[2] + ' (<span style="color:' + type_color(clin_type(feature)) + '">' + label_map[clin_type(feature)] + '</span>)';
-		}
-	});
 
 	var links = [{
 			label: 'UCSC Genome Browser',
@@ -221,102 +209,105 @@ define(['vq'], function(vq) {
 	var chrom_attr = vq.data.genome.chrom_attr;
 	var cytoband = vq.data.genome.cytoband;
 
-	_.each(links, function(item) {
-		hovercard_links_config[item.label] = item;
-	});
+	// _.each(links, function(item) {
+	// 	hovercard_links_config[item.label] = item;
+	// });
 
 	var div = document.body;
 
 	var config = function() {
 		return {
-			DATA: {
-				features: [],
-				edges: [],
-				hash: function(feature) {
-					return feature.label
-				}
-			},
-			PLOT: {
-				container: div,
-				width: width,
-				height: height,
-				vertical_padding: 10,
-				horizontal_padding: 10,
-				enable_pan: false,
-				enable_zoom: false,
-				show_legend: false
-			},
-
-			GENOME: {
+			DATATYPE: "vq.models.CircVisData",
+			CONTENTS: {
 				DATA: {
-					key_order: chrom_keys,
-					key_length: _.map(chrom_keys, function(key) {
-						return {
-							chr_name: key,
-							chr_length: chrom_attr[key].length
-						};
-					})
+					features: [],
+					edges: [],
+					hash: function(feature) {
+						return feature.label
+					}
 				},
-				OPTIONS: {
-					radial_grid_line_width: 2,
-					label_layout_style: 'clock',
-					label_font_style: '16px helvetica',
-					gap_degrees: 2
-				}
-			},
+				PLOT: {
+					container: div,
+					width: width,
+					height: height,
+					vertical_padding: 10,
+					horizontal_padding: 10,
+					enable_pan: false,
+					enable_zoom: false,
+					show_legend: false
+				},
 
-			WEDGE: [],
-			TICKS: {
-				OPTIONS: {
-					wedge_height: 15,
-					wedge_width: 0.7,
-					overlap_distance: 10000000, //tile ticks at specified base pair distance
-					height: 40,
-					fill_style: tick_colors,
-					tooltip_items: hovercard_items_config,
-					tooltip_links: hovercard_links_config
-				}
-			},
-			NETWORK: {
-				DATA: {
-					data_array: [] //
-				},
-				OPTIONS: {
-					render: true,
-					outer_padding: 10,
-					tile_nodes: Boolean(true),
-					node_overlap_distance: 3e7,
-					node_radius: 6,
-					node_fill_style: tick_colors,
-					link_stroke_style: "#CA949F",
-					link_line_width: 8,
-					link_alpha: 0.6,
-					node_highlight_mode: 'isolate',
-					node_key: function(node) {
-						return node.label;
+				GENOME: {
+					DATA: {
+						key_order: chrom_keys,
+						key_length: _.map(chrom_keys, function(key) {
+							return {
+								chr_name: key,
+								chr_length: chrom_attr[key].length
+							};
+						})
 					},
-					node_tooltip_items: hovercard_items_config,
-					node_tooltip_links: hovercard_links_config,
-					link_tooltip_items: {
-						'Target': function(link) {
-							var label = link.source.label.split(':');
-							return '<span style="color:' + tick_colors(link.source) + '">' +
-								label_map[label[1]] + '</span> ' + label[2];
+					OPTIONS: {
+						radial_grid_line_width: 2,
+						label_layout_style: 'clock',
+						label_font_style: '16px helvetica',
+						gap_degrees: 2
+					}
+				},
+
+				WEDGE: [],
+				TICKS: {
+					OPTIONS: {
+						wedge_height: 15,
+						wedge_width: 0.7,
+						overlap_distance: 10000000, //tile ticks at specified base pair distance
+						height: 90,
+						fill_style: tick_colors,
+						tooltip_items: hovercard_items_config,
+						tooltip_links: hovercard_links_config
+					}
+				},
+				NETWORK: {
+					DATA: {
+						data_array: [] //
+					},
+					OPTIONS: {
+						render: true,
+						outer_padding: 10,
+						tile_nodes: Boolean(true),
+						node_overlap_distance: 3e7,
+						node_radius: 6,
+						node_fill_style: tick_colors,
+						link_stroke_style: "#CA949F",
+						link_line_width: 8,
+						link_alpha: 0.6,
+						node_highlight_mode: 'isolate',
+						node_key: function(node) {
+							return node.label;
 						},
-						'Target Location': function(link) {
-							return 'Chr ' + link.source.chr + ' ' + link.source.start +
-								(link.source.end ? '-' + link.source.end : '');
-						},
-						'Predictor': function(link) {
-							var label = link.target.label.split(':');
-							return '<span style="color:' + tick_colors(link.target) + '">' +
-								label_map[label[1]] + '</span> ' + label[2];
-						},
-						'Predictor Location': function(link) {
-							return 'Chr ' + link.target.chr + ' ' + link.target.start +
-								(link.target.end ? '-' + link.target.end : '');
-						},
-						Importance: 'assoc_value1'
+						node_tooltip_items: hovercard_items_config,
+						node_tooltip_links: hovercard_links_config,
+						link_tooltip_items: {
+							'Target': function(link) {
+								var label = link.source.label.split(':');
+								return '<span style="color:' + tick_colors(link.source) + '">' +
+									label_map[label[1]] + '</span> ' + label[2];
+							},
+							'Target Location': function(link) {
+								return 'Chr ' + link.source.chr + ' ' + link.source.start +
+									(link.source.end ? '-' + link.source.end : '');
+							},
+							'Predictor': function(link) {
+								var label = link.target.label.split(':');
+								return '<span style="color:' + tick_colors(link.target) + '">' +
+									label_map[label[1]] + '</span> ' + label[2];
+							},
+							'Predictor Location': function(link) {
+								return 'Chr ' + link.target.chr + ' ' + link.target.start +
+									(link.target.end ? '-' + link.target.end : '');
+							},
+							Importance: 'assoc_value1'
+						}
 					}
 				}
 			}
@@ -326,7 +317,7 @@ define(['vq'], function(vq) {
 	var ring = function(pair) {
 		return {
 			PLOT: {
-				height: 10,
+				height: 40,
 				type: 'glyph'
 			},
 			DATA: {
@@ -366,15 +357,19 @@ define(['vq'], function(vq) {
 			return config_obj;
 		},
 		container: function(div) {
-			config_obj.PLOT.container = div;
+			config_obj.CONTENTS.PLOT.container = div;
 			return this;
 		},
 		rings: function(test_pairs) {
-			config_obj.WEDGE = test_pairs.map(ring);
+			config_obj.CONTENTS.WEDGE = test_pairs.map(ring);
 			return this;
 		},
 		size: function(diameter) {
-			config_obj.PLOT.width = config_obj.PLOT.height = diameter;
+			config_obj.CONTENTS.PLOT.width = config_obj.CONTENTS.PLOT.height = diameter;
+			return this;
+		},
+		data: function(data) {
+			config_obj.CONTENTS.DATA.features = data;
 			return this;
 		}
 	};

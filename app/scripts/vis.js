@@ -6,6 +6,8 @@ define([
 function initializeVis(deferred) {
 	deferred.resolve();
 }
+var configObj;
+var circle_vis;
 
 	var Vis = {
 		initialize: function() {
@@ -14,16 +16,14 @@ function initializeVis(deferred) {
 			return deferred.promise();
 		},
 		plot : function(div) {
-			var config = circ_config.container(div).rings([{key:"FBAT:M",label:"FBAT"}]).config();
-			var dataObject = {
-				DATATYPE: "vq.models.CircVisData",
-				CONTENTS: config
-			};
-			var circle_vis = new vq.CircVis(dataObject);
+			configObj = circ_config.container(div).rings([{key:"FBAT:M",label:"FBAT"}]).config();
+			circle_vis = new vq.CircVis(configObj);
 			circle_vis();
-			return circle_vis;
+			circle_vis;
+		},
+		addData : function(data) {
+			circle_vis.addNodes(data);
 		}
-
 
 	};
 	return Vis;

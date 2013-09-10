@@ -27,6 +27,14 @@ define(['data', 'menu', 'vis', 'mediator-js'], function(data, menu, vis, Mediato
         },
         start: function() {
             vis.plot($('#circvis').get(0));
+            var state = menu.state();
+            var promise = data.request(state);
+            promise.done(function(responseObject){
+				
+				if (responseObject.status === 'success') {
+					vis.addData(responseObject.results);
+				}
+            });
         }
     };
     return App;
