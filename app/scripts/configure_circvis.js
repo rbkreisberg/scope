@@ -118,7 +118,7 @@ define(['vq'], function(vq) {
 
 	var shape_map = {
 		'A': 'cross',
-		'D': 'triangle-up',
+		'D': 'circle',
 		'R': 'triangle-down',
 		'BORDA': 'square',
 		'other' : 'diamond'
@@ -256,13 +256,14 @@ define(['vq'], function(vq) {
 					}
 				},
 
-				WEDGE: [],
+				// WEDGE: [],
 				TICKS: {
 					OPTIONS: {
+						render_ticks: false,
 						wedge_height: 15,
 						wedge_width: 0.7,
 						overlap_distance: 10000000, //tile ticks at specified base pair distance
-						height: 90,
+						height: 30,
 						fill_style: tick_colors,
 						tooltip_items: hovercard_items_config,
 						tooltip_links: hovercard_links_config
@@ -315,32 +316,32 @@ define(['vq'], function(vq) {
 		};
 	}
 
-	var ring = function(pair) {
+	var ring = function(test) {
 		return {
 			PLOT: {
-				height: 40,
+				height: 100,
 				type: 'glyph'
 			},
 			DATA: {
-				value_key: pair.key,
-
+				value_key: test.key,
+				data_array: test.data,
 				},
 			OPTIONS: {
-				tile_height: 10,
-				tile_padding: 4,
-				tile_overlap_distance: 100000000,
+				tile_height: 8,
+				tile_padding: 3,
+				tile_overlap_distance: 40000000,
 				tile_show_all_tiles: true,
 				fill_style: tick_colors,
 				stroke_style: null,
 				line_width: 3,
-				legend_label: pair.label,
+				legend_label: test.label,
 				shape: shape,
-				radius: 9,
-				legend_description: pair.label,
+				radius: 8,
+				legend_description: test.label,
 				listener: function() {
 					return null;
 				},
-				outer_padding: 5,
+				outer_padding: 0,
 				tooltip_items: hovercard_items_config,
 				tooltip_links: hovercard_links_config
 			}
@@ -360,8 +361,8 @@ define(['vq'], function(vq) {
 			config_obj.CONTENTS.PLOT.container = div;
 			return this;
 		},
-		rings: function(test_pairs) {
-			config_obj.CONTENTS.WEDGE = test_pairs.map(ring);
+		rings: function(tests) {
+			config_obj.CONTENTS.WEDGE = tests.map(ring);
 			return this;
 		},
 		size: function(diameter) {
