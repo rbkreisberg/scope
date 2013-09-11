@@ -8,6 +8,7 @@ function initializeVis(deferred) {
 }
 var configObj;
 var circle_vis;
+var configInstance;
 
 	var Vis = {
 		initialize: function() {
@@ -16,7 +17,8 @@ var circle_vis;
 			return deferred.promise();
 		},
 		plot : function(div) {
-			configObj = circ_config.container(div).rings([{key:"FBAT:M",label:"FBAT"}]).config();
+			configInstance = circ_config.container(div).rings([{key:"FBAT:M",label:"FBAT"}]);
+			configObj = configInstance.config();
 			circle_vis = new vq.CircVis(configObj);
 			circle_vis();
 			circle_vis;
@@ -26,6 +28,7 @@ var circle_vis;
 			return this;
 		},
 		addData : function(data) {
+			configObj = circ_config.rings([{key:"FBAT:M",label:"FBAT", data: data}]).config()
 			circle_vis.addNodes(data);
 			return this;
 		}
