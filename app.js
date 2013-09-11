@@ -70,7 +70,7 @@ function RetrieveVariants(params, res) {
     if ( clauses.length > 0 ) { where = ' where ' + clauses.join(' and '); }
     
     var sql = 'SELECT chr, start, test_type, test_model, target_label, sample, score from ' + table + 
-          where +' order by score asc limit 300';
+          where +' order by score asc limit 100';
 
     console.log('querying: ' + sql);
 
