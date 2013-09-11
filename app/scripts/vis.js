@@ -21,8 +21,13 @@ var circle_vis;
 			circle_vis();
 			circle_vis;
 		},
+		empty : function() {
+			circle_vis.removeNodes(function(a) {return true;});
+			return this;
+		},
 		addData : function(data) {
 			circle_vis.addNodes(data);
+			return this;
 		}
 
 	};

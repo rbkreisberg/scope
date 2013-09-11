@@ -3,11 +3,11 @@ define([
 	'use strict'
 
 function formURL(filter) {
-	return '/variants/variant_tests_summary_090913/' + filter.target + '/' + filter.test + '/' + filter.model;
+	return 'variants/variant_tests_summary_090913/' + filter.target + '/' + filter.test + '/' + filter.model;
 }
 
 function loadData(filter) {
-	return $.when($.getJSON(formURL(filter)));
+	return $.getJSON(formURL(filter));
 }
 
 	var Data = {

@@ -1,6 +1,9 @@
 define([
-], function() {
+	'mediator-js'
+], function(mediator) {
 'use strict'
+
+
 
 function initializeMenu( deferred ){
 	setupSideMenu();
@@ -12,6 +15,9 @@ function setupSideMenu() {
 	    $('#mainPanel').toggleClass('col-md-10 col-md-8').toggleClass('col-lg-10 col-lg-8');
 	    $('#sideMenu').toggleClass('col-md-2 col-md-4').toggleClass('col-lg-2 col-lg-4');
 	    $('#sideMenuButton').toggleClass('glyphicon-chevron-right glyphicon-chevron-left');
+	});
+	$('#executeBtn').on('click', function() {
+		mediator.publish('application:menu:loadData', Menu.state());
 	});
 }
 

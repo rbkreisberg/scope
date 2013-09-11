@@ -88,11 +88,11 @@ define(['vq'], function(vq) {
 		height = 900,
 		cnv_ring_height = 20,
 		color_scale = {
-			'GEXP': "#7D989F",
+			'TDT': "#7D989F",
 			//blue
-			'METH': "#8CCE62",
+			'FBAT': "#8CCE62",
 			//green
-			'CNVR': "#9C8643",
+			'FAM_AGGR': "#9C8643",
 			//orange
 			'MIRN': "#A15FB1",
 			//purple
@@ -108,8 +108,7 @@ define(['vq'], function(vq) {
 		};
 
 	function feature_type(feature) {
-		return feature && feature.label && !! ~feature.label.indexOf(':') ?
-			feature.label.split(':')[1] : 'other';
+		return feature && feature.test_type ? feature.test_type : 'other';
 	}
 
 	function clin_type(feature) {
@@ -118,13 +117,16 @@ define(['vq'], function(vq) {
 	}
 
 	var shape_map = {
-		'CLIN': 'square',
-		'SAMP': 'cross',
-		'other': 'diamond'
+		'A': 'cross',
+		'D': 'triangle-up',
+		'R': 'triangle-down',
+		'BORDA': 'square',
+		'other' : 'diamond'
 	};
 
-	function shape(type) {
-		return shape_map[type];
+	function shape(feature) {
+		if (feature.test_model in shape_map) return shape_map[feature.test_model];
+		return shape_map['other'];
 	}
 
 	function clinical_shape(feature) {
@@ -167,39 +169,38 @@ define(['vq'], function(vq) {
 		'Score': 'score'
 	};
 
+	var targetMap = {
+		'Preterm' : 'B:CLIN:Preterm:NB::::',
+		'1n2v4' : 'B:CLIN:1n2v4:NB::::',
+		'1v4' : 'B:CLIN:1v4:NB::::',
+		'ETPL' : 'B:CLIN:ETPL:NB::::',
+		'History_of_Preterm_Birth' : 'B:MRGE:History_of_Preterm_Birth:NB::::',
+		'Placenta_Related' : 'B:MRGE:Placenta_Related:NB::::',
+		'Prom_Related' :  'B:MRGE:Prom_Related:NB::::',
+		'Preeclampsia/Eclampsia' :  'B:CLIN:Preeclampsia/Eclampsia:M::::',
+		'Incompentent_Shortened_Cervix' :  'B:CLIN:Incompentent_Shortened_Cervix:M::::',
+		'Uterine_Related' :  'B:MRGE:Uterine_Related:NB::::',
+		'Strict_Infection_Related' :  'B:MRGE:Strict_Infection_Related:NB::::',
+	};
+
 	var links = [{
-			label: 'UCSC Genome Browser',
-			key: 'ucsc',
-			url: 'http://genome.ucsc.edu/cgi-bin/hgTracks',
-			uri: '?db=hg18&position=chr',
+			label: 'Sample Summary',
+			key: 'seqpeek',
+			url: 'http://vis.systemsbiology.net/seqpeek/index.html',
+			uri: '#sample_summary',
 			href: function(feature) {
-				return 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg18&position=chr' + feature.chr + ':' + feature.start + (feature.end == '' ? '' : '-' + feature.end);
+				return 'http://vis.systemsbiology.net/seqpeek/index.html#sample_summary/chr' + 
+				feature.chr + '/' + feature.start + '/' + encodeURIComponent(targetMap[feature.target_label]);
 			}
 		}, //ucsc_genome_browser
 		{
-			label: 'Ensembl',
-			key: 'ensembl',
-			url: 'http://uswest.ensembl.org/Homo_sapiens/Location/View',
-			uri: '?r=',
+			label: 'Family Summary',
+			key: 'seqpeek',
+			url: 'http://vis.systemsbiology.net/seqpeek/index.html',
+			uri: '#sample_summary',
 			href: function(feature) {
-				return 'http://uswest.ensembl.org/Homo_sapiens/Location/View?r=' + feature.chr + ':' + feature.start + (feature.end == '' ? '' : '-' + feature.end);
-			}
-		}, //ensemble
-		{
-			label: 'Cosmic',
-			key: 'cosmic',
-			url: 'http://www.sanger.ac.uk/perl/genetics/CGP/cosmic',
-			uri: '?action=bygene&ln=',
-			href: function(feature) {
-				return _.include(['CNVR', 'MIRN', 'METH'], feature.source) ? 'http://www.sanger.ac.uk/perl/genetics/CGP/cosmic?action=bygene&ln=' + feature.label.split(':')[2] : null;
-			}
-		}, {
-			label: 'miRBase',
-			key: 'mirbase',
-			url: 'http://mirbase.org/cgi-bin/query.pl',
-			uri: '?terms=',
-			href: function(feature) {
-				return feature.source == 'MIRN' ? 'http://www.mirbase.org/cgi-bin/query.pl?terms=' + feature.label.split(':')[2] : null;
+				return 'http://vis.systemsbiology.net/seqpeek/index.html#family_summary/chr' + 
+				feature.chr + '/' + feature.start + '/' + encodeURIComponent(targetMap[feature.target_label]);
 			}
 		}
 	];
@@ -209,9 +210,9 @@ define(['vq'], function(vq) {
 	var chrom_attr = vq.data.genome.chrom_attr;
 	var cytoband = vq.data.genome.cytoband;
 
-	// _.each(links, function(item) {
-	// 	hovercard_links_config[item.label] = item;
-	// });
+	_.each(links, function(item) {
+		hovercard_links_config[item.label] = item;
+	});
 
 	var div = document.body;
 
@@ -223,7 +224,7 @@ define(['vq'], function(vq) {
 					features: [],
 					edges: [],
 					hash: function(feature) {
-						return feature.label
+						return feature.chr + '_' + feature.start + '_' + feature.target_label + '_' + feature.test_type;
 					}
 				},
 				PLOT: {
@@ -272,7 +273,7 @@ define(['vq'], function(vq) {
 						data_array: [] //
 					},
 					OPTIONS: {
-						render: true,
+						render: false,
 						outer_padding: 10,
 						tile_nodes: Boolean(true),
 						node_overlap_distance: 3e7,
@@ -322,27 +323,26 @@ define(['vq'], function(vq) {
 			},
 			DATA: {
 				value_key: pair.key,
-			},
+
+				},
 			OPTIONS: {
 				tile_height: 10,
 				tile_padding: 4,
 				tile_overlap_distance: 100000000,
 				tile_show_all_tiles: true,
-				fill_style: function(feature) {
-					return 'red';
-				},
+				fill_style: tick_colors,
 				stroke_style: null,
 				line_width: 3,
 				legend_label: pair.label,
-				shape: 'circle',
+				shape: shape,
 				radius: 9,
 				legend_description: pair.label,
 				listener: function() {
 					return null;
 				},
 				outer_padding: 5,
-				tooltip_items: {},
-				tooltip_links: {}
+				tooltip_items: hovercard_items_config,
+				tooltip_links: hovercard_links_config
 			}
 		}
 	};
@@ -371,7 +371,8 @@ define(['vq'], function(vq) {
 		data: function(data) {
 			config_obj.CONTENTS.DATA.features = data;
 			return this;
-		}
+		},
+
 	};
 
 	return CircvisObj;

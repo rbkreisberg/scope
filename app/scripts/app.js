@@ -1,5 +1,5 @@
 /*global define */
-define(['data', 'menu', 'vis', 'mediator-js'], function(data, menu, vis, Mediator) {
+define(['data', 'menu', 'vis', 'mediator-js' ], function(data, menu, vis, mediator) {
     'use strict';
 
     function applicationEventHandler() {
@@ -7,19 +7,31 @@ define(['data', 'menu', 'vis', 'mediator-js'], function(data, menu, vis, Mediato
     }
 
     function initializeMediator() {
-        Mediator.subscribe('application', applicationEventHandler);
+        mediator.subscribe('application', applicationEventHandler);
+        mediator.subscribe('application:menu:loadData', loadDataEventHandler);
     }
 
-    function setup() {
-        var deferred = $.Deferred();
-        initializeMediator();
-        return deferred.promise();
+    function loadDataEventHandler(menuState) {
+    	executeLoadData(menuState);
+    }
+
+    function executeLoadData(state) {
+			var promise = data.request(state);
+            promise.done(function(responseObject){				
+				if (responseObject.status === 'success') {
+					vis.empty().addData(responseObject.results);
+				}
+            });
+    }
+
+    function setup() {        
+        return initializeMediator();
     }
 
     var App = {
         initialize: function() {
-            var deferred = $.when(setup)
-                .then(data.initialize)
+        			setup();
+            var deferred = $.when(data.initialize)
                 .then(menu.initialize)
                 .done(vis.initialize);
 
@@ -28,13 +40,7 @@ define(['data', 'menu', 'vis', 'mediator-js'], function(data, menu, vis, Mediato
         start: function() {
             vis.plot($('#circvis').get(0));
             var state = menu.state();
-            var promise = data.request(state);
-            promise.done(function(responseObject){
-				
-				if (responseObject.status === 'success') {
-					vis.addData(responseObject.results);
-				}
-            });
+            executeLoadData(state);
         }
     };
     return App;
